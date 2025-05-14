@@ -39,16 +39,19 @@ def generar_pdf_completo(nombre, email, telefono, datos, logo_path="logo.png"):
     pdf = FPDF()
     pdf.add_page()
 
+    # REGISTRAR FUENTE UTF-8
+    pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
+    pdf.set_font("DejaVu", size=12)
+
     try:
         pdf.image(logo_path, x=10, y=8, w=30)
     except:
         pass
 
-    pdf.set_font("Arial", size=12)
     pdf.cell(200, 10, txt="Presupuesto de Reforma", ln=1, align="C")
     pdf.ln(10)
 
-    pdf.set_font("Arial", size=10)
+    pdf.set_font("DejaVu", size=10)
     pdf.cell(200, 10, f"Cliente: {nombre}", ln=1)
     pdf.cell(200, 10, f"Email: {email}", ln=1)
     pdf.cell(200, 10, f"Teléfono: {telefono}", ln=1)
@@ -58,20 +61,21 @@ def generar_pdf_completo(nombre, email, telefono, datos, logo_path="logo.png"):
     total_general = 0
 
     for categoria, detalle in datos.items():
-        pdf.set_font("Arial", "B", 11)
+        pdf.set_font("DejaVu", "B", 11)
         pdf.cell(200, 10, f"Categoría: {categoria}", ln=1)
-        pdf.set_font("Arial", size=10)
+        pdf.set_font("DejaVu", size=10)
         for concepto, precio in detalle.items():
             pdf.multi_cell(0, 10, f"{concepto}: {precio:.2f} €")
             total_general += precio
         pdf.ln(5)
 
-    pdf.set_font("Arial", "B", 12)
+    pdf.set_font("DejaVu", "B", 12)
     pdf.cell(200, 10, f"Total estimado: {total_general:.2f} €", ln=1)
 
     filename = "presupuesto_completo.pdf"
     pdf.output(filename)
     return filename
+
 
 # -------- INTERFAZ --------
 
