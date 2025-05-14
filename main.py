@@ -41,6 +41,7 @@ def generar_pdf_completo(nombre, email, telefono, datos, logo_path="logo.png"):
 
     # REGISTRAR FUENTE UTF-8
     pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
+    pdf.add_font("DejaVu", "B", "DejaVuSans.ttf", uni=True)
     pdf.set_font("DejaVu", size=12)
 
     try:
