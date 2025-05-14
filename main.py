@@ -35,43 +35,99 @@ def calcular_presupuesto(categoria, inputs, precios):
             total += subtotal
     return total, detalle
 
-def generar_pdf_completo(nombre, email, telefono, datos, logo_path="logo.png"):
+def generar_pdf_completo(nombre, email, telefono, datos, logo_path="logo.jpg"):
     pdf = FPDF()
     pdf.add_page()
 
-    # REGISTRAR FUENTE UTF-8
+    # Fuente UTF-8
     pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
     pdf.add_font("DejaVu", "B", "DejaVuSans.ttf", uni=True)
-    pdf.set_font("DejaVu", size=12)
+    pdf.set_font("DejaVu", size=10)
 
+    # CABECERA
     try:
         pdf.image(logo_path, x=10, y=8, w=30)
     except:
         pass
 
-    pdf.cell(200, 10, txt="Presupuesto de Reforma", ln=1, align="C")
-    pdf.ln(10)
+    pdf.set_xy(140, 8)
+    pdf.cell(60, 10, "C/Dulce Chacón 17, piso 18G", ln=1, align="R")
+    pdf.set_xy(140, 14)
+    pdf.cell(60, 10, f"Madrid, {datetime.now().strftime('%d de %B de %Y')}", ln=1, align="R")
 
-    pdf.set_font("DejaVu", size=10)
-    pdf.cell(200, 10, f"Cliente: {nombre}", ln=1)
-    pdf.cell(200, 10, f"Email: {email}", ln=1)
-    pdf.cell(200, 10, f"Teléfono: {telefono}", ln=1)
-    pdf.cell(200, 10, f"Fecha: {datetime.now().strftime('%d/%m/%Y')}", ln=1)
     pdf.ln(10)
+    pdf.set_font("DejaVu", "B", 14)
+    pdf.cell(0, 10, "PRESUPUESTO DETALLADO", ln=1, align="C")
+    pdf.ln(5)
 
+    pdf.set_font("DejaVu", "", 10)
+    pdf.cell(0, 8, f"Cliente: {nombre}", ln=1)
+    pdf.cell(0, 8, f"Email: {email}", ln=1)
+    pdf.cell(0, 8, f"Teléfono: {telefono}", ln=1)
+    pdf.ln(8)
+
+    # CONCEPTOS NUMERADOS
+    pdf.set_font("DejaVu", "B", 11)
+    pdf.cell(0, 10, "CONCEPTO", ln=1)
+
+    pdf.set_font("DejaVu", "", 10)
     total_general = 0
+    num = 1
+    totales_por_categoria = {}
 
     for categoria, detalle in datos.items():
-        pdf.set_font("DejaVu", "B", 11)
-        pdf.cell(200, 10, f"Categoría: {categoria}", ln=1)
-        pdf.set_font("DejaVu", size=10)
+        subtotal_categoria = 0
+        pdf.set_font("DejaVu", "B", 10)
+        pdf.cell(0, 8, f"{categoria}:", ln=1)
+        pdf.set_font("DejaVu", "", 10)
         for concepto, precio in detalle.items():
-            pdf.multi_cell(0, 10, f"{concepto}: {precio:.2f} €")
-            total_general += precio
-        pdf.ln(5)
+            pdf.multi_cell(0, 8, f"{num}. {concepto} - {precio:.2f} €")
+            subtotal_categoria += precio
+            num += 1
+        pdf.ln(2)
+        totales_por_categoria[categoria] = subtotal_categoria
+        total_general += subtotal_categoria
 
+    # CAPÍTULOS + GASTOS + IVA
+    pdf.ln(5)
+    pdf.set_font("DejaVu", "B", 11)
+    pdf.cell(0, 10, "PRESUPUESTO", ln=1)
+
+    pdf.set_font("DejaVu", "", 10)
+    for cap, total in totales_por_categoria.items():
+        pdf.cell(0, 8, f"- {cap}: {total:.2f} €", ln=1)
+
+    gastos_generales = total_general * 0.05
+    iva = 0.00
+    valor_estimado = total_general + gastos_generales + iva
+
+    pdf.cell(0, 8, f"GASTOS GENERALES (5%): {gastos_generales:.2f} €", ln=1)
+    pdf.cell(0, 8, f"VALOR ESTIMADO: {valor_estimado:.2f} €", ln=1)
+    pdf.cell(0, 8, f"IVA (0%): {iva:.2f} €", ln=1)
     pdf.set_font("DejaVu", "B", 12)
-    pdf.cell(200, 10, f"Total estimado: {total_general:.2f} €", ln=1)
+    pdf.cell(0, 10, f"TOTAL: {valor_estimado:.2f} €", ln=1)
+
+    # TÉRMINOS
+    pdf.ln(10)
+    pdf.set_font("DejaVu", "B", 11)
+    pdf.cell(0, 10, "TÉRMINOS Y CONDICIONES:", ln=1)
+    pdf.set_font("DejaVu", "", 9)
+    pdf.multi_cell(0, 6, """
+1. CADUCIDAD DEL PRESUPUESTO: Este presupuesto tiene una validez de 30 días desde la entrega.
+2. CONDICIONES DE PAGO: Se pagará el 40% a la firma del presupuesto y el resto al finalizar los trabajos.
+3. DURACIÓN: La duración estimada de la obra será acordada con la propiedad, considerando solo días laborables.
+4. MODIFICACIONES: Cualquier cambio durante la obra podrá alterar el importe final del presupuesto.
+""")
+
+    # FIRMAS
+    pdf.ln(10)
+    pdf.set_font("DejaVu", "", 10)
+    pdf.cell(0, 10, "Firmado en _____________________________ con fecha ________________________________", ln=1)
+    pdf.ln(10)
+    pdf.cell(0, 8, "EL AUTOR DEL PRESUPUESTO", ln=1)
+    pdf.cell(0, 8, "Vorobchevici, Vasile", ln=1)
+    pdf.ln(8)
+    pdf.cell(0, 8, "CONFORME: PROPIEDAD", ln=1)
 
     filename = "presupuesto_completo.pdf"
     pdf.output(filename)
