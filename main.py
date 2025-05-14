@@ -3,6 +3,8 @@ import pandas as pd
 from fpdf import FPDF
 from datetime import datetime
 
+st.set_page_config(page_title="VREFORMAS", layout="centered")
+
 # --------- CARGAR PRECIOS DESDE EXCEL ---------
 
 @st.cache_data
@@ -68,7 +70,6 @@ def generar_pdf(nombre, email, telefono, categoria, detalle, total, logo_path="l
 
 # --------- INTERFAZ ---------
 
-st.set_page_config(page_title="Presupuesto Reformas", layout="centered")
 st.title("Calculadora de Presupuestos de Reforma")
 
 nombre = st.text_input("Nombre del cliente")
