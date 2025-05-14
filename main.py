@@ -5,16 +5,6 @@ from datetime import datetime
 
 st.set_page_config(page_title="VREFORMAS", layout="centered")
 
-# --------- CARGAR PRECIOS DESDE EXCEL ---------
-
-import streamlit as st
-import pandas as pd
-from fpdf import FPDF
-from datetime import datetime
-
-# -------- CONFIGURACIÓN DE PÁGINA --------
-st.set_page_config(page_title="Presupuesto Reforma", layout="centered")
-
 # -------- CARGAR PRECIOS DESDE EXCEL --------
 @st.cache_data
 def cargar_precios_excel(path="precios.xlsx"):
